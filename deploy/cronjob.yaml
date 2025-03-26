@@ -11,7 +11,7 @@ spec:
         spec:
           containers:
             - name: dns-caddy
-              image: image: wilgrimthepilgrim/caddy:0.1
+              image: wilgrimthepilgrim/caddy:0.1
               envFrom:
               - secretRef:
                   name: caddy-secret
