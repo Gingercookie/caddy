@@ -4,7 +4,7 @@ metadata:
   name: caddy-cronjob
   namespace: caddy
 spec:
-  schedule: "1/2 * * * *" # Runs every hour
+  schedule: "0/30 * * * *" # Runs every 30m
   jobTemplate:
     spec:
       template:
