@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/cloudflare/cloudflare-go"
+	"github.com/hashicorp/vault/api"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -38,9 +39,7 @@ func init() {
 	viper.BindPFlags(pflag.CommandLine)
 
 	// Read environment variables if flags are not provided
-	apiToken = viper.GetString("api-token")
-	zoneName = viper.GetString("zone-name")
-	recordName = viper.GetString("record-name")
+	apiToken, recordName, zoneName = retrieveVaultSecret()
 
 	// Validate required fields
 	if apiToken == "" || zoneName == "" || recordName == "" {
@@ -50,12 +49,54 @@ func init() {
 		fmt.Println("CLOUDFLARE_RECORD_NAME (or --record-name)")
 		os.Exit(1)
 	}
+}
 
-	// Print help if no arguments or flags provided
-	if len(os.Args) < 2 {
-		pflag.PrintDefaults()
-		os.Exit(0)
+func retrieveVaultSecret() (string, string, string) {
+	config := api.DefaultConfig()
+	config.Address = "http://10.43.80.26:8200" // Use the service name or appropriate URL
+
+	// Create a new Vault client
+	client, err := api.NewClient(config)
+	if err != nil {
+		log.Fatalf("unable to initialize Vault client: %v", err)
 	}
+
+	// Set the token for dev mode (using the pre-configured token)
+	client.SetToken("root")
+
+	// Read the secret from the path "secret/myapp"
+	secret, err := client.Logical().Read("/secret/data/cloudflare")
+	if err != nil {
+		log.Fatalf("unable to read secret: %v", err)
+	}
+	if secret == nil {
+		log.Fatal("no secret found at the specified path")
+	}
+
+	secretData, ok := secret.Data["data"].(map[string]interface{})
+	if !ok {
+		log.Fatal("failed to parse secret data")
+	}
+
+	// Extract the API_TOKEN value
+	apiToken, ok := secretData["api-token"].(string)
+	if !ok {
+		log.Fatal("api-token not found or is not a string in the secret")
+	}
+
+	// Extract the record-name value
+	recordName, ok := secretData["record-name"].(string)
+	if !ok {
+		log.Fatal("record-name not found or is not a string in the secret")
+	}
+
+	// Extract the API_TOKEN value
+	zoneName, ok := secretData["zone-name"].(string)
+	if !ok {
+		log.Fatal("zone-name not found or is not a string in the secret")
+	}
+
+	return apiToken, recordName, zoneName
 }
 
 func main() {
