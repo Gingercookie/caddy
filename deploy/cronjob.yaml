@@ -11,8 +11,5 @@ spec:
         spec:
           containers:
             - name: dns-caddy
-              image: wilgrimthepilgrim/caddy:0.1
-              envFrom:
-              - secretRef:
-                  name: caddy-secret
+              image: wilgrimthepilgrim/caddy:0.2
           restartPolicy: OnFailure
