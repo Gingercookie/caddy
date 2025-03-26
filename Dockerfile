@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . .
 RUN go mod download
-RUN go build -o dns-caddy .
+RUN GOARCH=arm64 GOOS=linux go build -o dns-caddy .
 
 # FROM scratch
 # COPY --from=builder /app/dns-caddy /dns-caddy
