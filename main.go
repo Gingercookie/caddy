@@ -78,6 +78,8 @@ func retrieveVaultSecret() (string, string, string) {
 		log.Fatal("failed to parse secret data")
 	}
 
+	log.Printf("Retrieved this data from vault %v\n\n", secretData)
+
 	// Extract the API_TOKEN value
 	apiToken, ok := secretData["api-token"].(string)
 	if !ok {
