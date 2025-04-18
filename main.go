@@ -160,6 +160,7 @@ func main() {
 			Content: record.Content,
 			TTL:     record.TTL,
 			Proxied: record.Proxied,
+			ID:      record.ID,
 		})
 		if err != nil {
 			log.Fatalf("Error updating DNS record: %v", err)
